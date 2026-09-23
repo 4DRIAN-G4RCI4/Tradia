@@ -80,8 +80,9 @@ router.get("/:id/history", async (req, res, next) => {
         if (history) {
           return res.json({ ...history, source: "binance" });
         }
-      } catch {
+      } catch (err) {
         // Binance falló para este par puntual: seguimos con CoinGecko como respaldo.
+        console.error(`[market] Binance history falló para ${id}:`, err.response?.status, err.response?.data || err.message);
       }
     }
 
