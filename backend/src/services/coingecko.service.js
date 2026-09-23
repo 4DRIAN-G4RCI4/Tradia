@@ -2,7 +2,11 @@ import axios from "axios";
 import { config } from "../config.js";
 import { getOrFetch } from "./cache.service.js";
 
-const client = axios.create({ baseURL: config.coingeckoBaseUrl, timeout: 10000 });
+const client = axios.create({
+  baseURL: config.coingeckoBaseUrl,
+  timeout: 10000,
+  headers: config.coingeckoApiKey ? { "x-cg-demo-api-key": config.coingeckoApiKey } : {},
+});
 
 const PRICE_CHANGE_TIMEFRAMES = "1h,24h,7d,14d,30d,1y";
 

@@ -8,6 +8,7 @@ export const config = {
     .map((o) => o.trim())
     .filter(Boolean),
   coingeckoBaseUrl: "https://api.coingecko.com/api/v3",
+  coingeckoApiKey: process.env.COINGECKO_API_KEY || "",
   newsFeeds: [
     { source: "CoinDesk", url: "https://www.coindesk.com/arc/outboundfeeds/rss/" },
     { source: "Cointelegraph", url: "https://cointelegraph.com/rss" },
