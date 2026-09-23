@@ -5,10 +5,10 @@ import { MarketDataContext } from "./marketDataContext";
 
 // Una sola petición compartida por toda la app en vez de que cada
 // componente pida /market/top por su cuenta: evita saturar el rate
-// limit de CoinGecko. 60s de intervalo cae por encima del TTL de
-// caché del backend (90s para market/top), así que casi siempre pega
-// contra la caché del servidor y no contra CoinGecko directamente.
-const REFRESH_MS = 60_000;
+// limit de CoinGecko. El intervalo cae por encima del TTL de caché del
+// backend (300s para market/top), así que casi siempre pega contra la
+// caché del servidor y no contra CoinGecko directamente.
+const REFRESH_MS = 120_000;
 const LIMIT = 20;
 const STORAGE_KEY = "tradia-extra-coins";
 

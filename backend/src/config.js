@@ -13,12 +13,12 @@ export const config = {
     { source: "Cointelegraph", url: "https://cointelegraph.com/rss" },
   ],
   cacheTtl: {
-    marketTop: 90,
-    marketHistory: 300,
+    marketTop: 300, // 5 min: la cuota free de CoinGecko se agota rápido con varios usuarios
+    marketHistory: 600,
     news: 600,
     analysis: 900, // 15 min: el análisis por reglas no cambia tan rápido como el precio
-    global: 120,
-    trending: 300,
+    global: 300,
+    trending: 600,
     coinsList: 21600, // 6h: la lista completa de monedas casi no cambia
     coinSearch: 600, // 10 min: resultados de búsqueda por texto
   },
