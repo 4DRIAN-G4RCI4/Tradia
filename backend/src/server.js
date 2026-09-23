@@ -22,8 +22,7 @@ const rateLimitedResponse = (req, res) => {
 
 const globalLimiter = rateLimit({
   windowMs: 60_000,
-  limit: 5000, // TEMP: subido para medir capacidad real bajo carga, revertir a 150 después
-
+  limit: 150,
   standardHeaders: true,
   legacyHeaders: false,
   handler: rateLimitedResponse,
