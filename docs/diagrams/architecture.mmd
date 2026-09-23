@@ -1,0 +1,39 @@
+flowchart TB
+    subgraph Cliente["Navegador (SPA React)"]
+        U[Usuario]
+        UI[Dashboard / Noticias]
+    end
+
+    subgraph Frontend["Frontend — Vite + React"]
+        SPA[App.jsx / Rutas]
+        PROV[MarketDataProvider + hooks]
+        API_CLIENT[api/client.js axios baseURL /api]
+    end
+
+    subgraph Backend["Backend — Node.js + Express"]
+        API[Express API :4000]
+        ROUTES[market · news · analysis]
+        CACHES[Cache en memoria NodeCache]
+        ANA[Analysis engine por reglas]
+    end
+
+    subgraph Servicios["Servicios de datos"]
+        CG[CoinGecko API v3]
+        BN[Binance API klines]
+        RSS[CoinDesk RSS · Cointelegraph RSS]
+    end
+
+    U ==> UI
+    UI ==> SPA
+    SPA ==> PROV
+    PROV ==> API_CLIENT
+    API_CLIENT -- proxy dev /api --> API
+    API ==> ROUTES
+    ROUTES ==> CACHES
+    ROUTES ==> ANA
+    ANA --> CACHES
+    CACHES --> CG
+    CACHES --> BN
+    CACHES --> RSS
+
+    CG -. retry/backoff .-> CG

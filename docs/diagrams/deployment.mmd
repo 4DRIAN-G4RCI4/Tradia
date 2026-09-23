@@ -1,0 +1,28 @@
+flowchart TB
+    subgraph Prod["Producción (no desplegada — NO VERIFICADO)"]
+        CDN[CDN / edge (HTTPS, HSTS, CSP estricta, rate limit)]
+        FE[Frontend estático · Vite build]
+        BE[Backend Node.js/Express]
+        REV[Reverse proxy / proceso supervisor]
+        DNS[Dominio propio]
+    end
+
+    DNS --> CDN --> FE
+    CDN -- /api→proxy --> REV --> BE
+
+    subgraph Local["Local (verificado)"]
+        LFE["npm run dev:frontend · :5173 (Vite)"]
+        LBE["npm run dev:backend · :4000 (nodemon)"]
+        LFE -- proxy /api --> LBE
+    end
+
+    subgraph Props["Propuesta para producción"]
+        PR1["Dockerfile multi-etapa (node:lts-alpine, usuario no-root)"]
+        PR2["Github Actions: lint + build + tests"]
+        PR3["Variable CORS_ORIGINS con dominio real"]
+        PR4["Clave de proveedor en secret, nunca en repo"]
+        PR5["Health check /api/health + monitor"]
+        PR6["Reverse proxy con headers de seguridad y TLS"]
+    end
+
+    Prod -. "implementar" .-> Props

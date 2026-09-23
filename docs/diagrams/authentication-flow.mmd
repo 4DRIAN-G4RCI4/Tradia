@@ -1,0 +1,35 @@
+flowchart LR
+    subgraph Estado_Actual["Estado actual verificado en el repositorio"]
+        A1[Sin autenticación]
+        A2[Sin sesiones]
+        A3[Sin cookies]
+        A4[Sin usuarios]
+        A5[Sin JWT / tokens]
+        A6[Sin contraseñas]
+    end
+
+    A1 --> A2 --> A3 --> A4 --> A5 --> A6
+
+    subgraph Implicaciones["Implicaciones de seguridad"]
+        I1[No hay superficie de ataque de login/brute-force]
+        I2[No hay CSRF por sesión]
+        I3[No hay IDOR/BOLA — no hay datos de usuario]
+        I4[CORS `*` era de bajo riesgo — ya restringido vía CORS_ORIGINS]
+        I5["La autorización se limita a: API pública de solo lectura"]
+    end
+
+    A1 -.-> I1
+    A2 -.-> I2
+    A4 -.-> I3
+    A6 -.-> I4
+    A1 -.-> I5
+
+    subgraph Si_se_agrega["Si en el futuro se agrega autenticación"]
+        B1[Usar hashing con bcrypt/argon2]
+        B2[Sesiones o JWT con expiración y refresh]
+        B3[Cookies Secure + HttpOnly + SameSite]
+        B4[Rate limiting en /login y /auth]
+        B5[MFA y bloqueo por intentos]
+        B6["Restringir CORS estrictamente (obligatorio)"]
+    end
+    Si_se_agrega -. "N/A hoy" .-> Estado_Actual

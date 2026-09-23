@@ -1,0 +1,41 @@
+sequenceDiagram
+    autonumber
+    participant B as Navegador (React)
+    participant A as Backend Express
+    participant C as Caché (NodeCache)
+    participant G as CoinGecko
+    participant X as Binance
+    participant R as RSS CoinDesk/Cointelegraph
+
+    B->>A: GET /api/market/top?limit=20
+    A->>C: cache.get("market:top:20")
+    alt cache hit
+        C-->>A: datos en caché
+    else cache miss (single-flight)
+        A->>G: /coins/markets (timeout 10s, retry 2)
+        G-->>A: 20 monedas
+        A->>C: cache.set(90s TTL)
+    end
+    A-->>B: JSON normalizado
+
+    B->>A: GET /api/market/bitcoin/history?days=7
+    A->>A: ¿pertenece a Binance?
+    alt Binance soportado
+        A->>X: /klines (timeout 8s)
+        X-->>A: velas OHLCV
+    else fallback
+        A->>G: /coins/bitcoin/market_chart
+    end
+    A->>C: cache.set(300s TTL)
+    A-->>B: JSON {source, prices[]}
+
+    B->>A: POST /api/analysis/market
+    A->>A: generateMarketAnalysis()
+    A->>G: getTopCoins()
+    A->>R: getNews() (Promise.all)
+    R-->>A: 30 noticias
+    A->>A: análisis por reglas (sentimiento + tendencia)
+    A->>C: cache.set(900s TTL)
+    A-->>B: resumen + disclaimer
+
+    Note over B,A: Sin autenticación — todos los endpoints son públicos y de solo lectura

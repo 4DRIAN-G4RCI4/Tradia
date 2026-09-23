@@ -1,0 +1,43 @@
+flowchart TD
+    subgraph Activos["Activos"]
+        A1["Datos de mercado (precios, histórico, sparklines)"]
+        A2["Noticias agregadas"]
+        A3["Análisis generado por reglas"]
+        A4["Cuota de API CoinGecko (free tier)"]
+        A5["Disponibilidad del sitio"]
+        A6["Configuración (.env)"]
+        A7["Caché en memoria"]
+    end
+
+    subgraph Actores["Actores"]
+        U["Usuario normal"]
+        AT["Atacante externo / bot"]
+        SC["Scraper automatizado"]
+        PC["Proveedor externo comprometido"]
+        AP["Atacante que abusa de la API"]
+    end
+
+    subgraph Amenazas["Amenazas (STRIDE)"]
+        S1["Spoofing — NS (no hay identidad)"]
+        T1["Tampering — datos de terceros manipulados"]
+        R1["Repudio — NS"]
+        I1["Info disclosure — headers, errores, fuentes"]
+        D1["DoS — abuso de cuota/API, cache poisoning"]
+        E1["Elevación — NS"]
+    end
+
+    U --> A1
+    SC --> A1
+    AP --> A4
+    AP --> A7
+    PC --> A2
+    PC --> A1
+    AT --> I1
+    AP --> D1
+
+    S1 -.-> A5
+    T1 -.-> A1
+    T1 -.-> A2
+    I1 -.-> A6
+    D1 -.-> A4
+    D1 -.-> A5

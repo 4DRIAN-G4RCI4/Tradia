@@ -1,0 +1,43 @@
+flowchart LR
+    subgraph Entrada["Puntos de entrada"]
+        R1["GET /api/health"]
+        R2["GET /api/market/*"]
+        R3["GET /api/news"]
+        R4["GET/POST /api/analysis/*"]
+        R5["Frontend estático (index.html)"]
+    end
+
+    subgraph Defensa["Defensas backend (aplicadas)"]
+        H1["Headers de seguridad<br/>X-Content-Type-Options · X-Frame-Options<br/>Referrer-Policy · Permissions-Policy"]
+        H2["CORS por lista de orígenes (CORS_ORIGINS)"]
+        H3["Validación/clamp de parámetros<br/>limit ≤250 · days ≤365 · q ≤100"]
+        H4["Caché acotada maxKeys=2000<br/>+ single-flight"]
+        H5["Errores genéricos al cliente<br/>(sin stack ni mensajes internos)"]
+        H6["X-Powered-By desactivado"]
+    end
+
+    subgraph DefensaB["Defensas frontend (aplicadas)"]
+        F1["CSP meta (script-src 'self')"]
+        F2["React escapa texto (sin sinks XSS)"]
+        F3["ErrorBoundary global"]
+        F4["rel=nofollow en enlaces externos"]
+    end
+
+    subgraph Pendiente["Pendiente (requiere decisión/producción)"]
+        P1["Rate limiting por IP/endpoint"]
+        P2["CSP estricta en borde (nonce/hash)"]
+        P3["Proveedor de datos alternativo"]
+        P4["HTTPS + HSTS en hosting"]
+        P5["Logging/métricas/alertas"]
+    end
+
+    R1 --> H1 --> H2 --> H5
+    R2 --> H3 --> H4
+    R3 --> H3
+    R4 --> H3 --> H4
+    R5 --> F1 --> F2 --> F3 --> F4
+
+    H1 -. "producción" .-> P2
+    H2 -. "ampliar" .-> P1
+    H4 -. "proveedor caído" .-> P3
+    H5 -. "https" .-> P4
