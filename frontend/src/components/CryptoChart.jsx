@@ -87,8 +87,16 @@ export default function CryptoChart({ coinId, days, onDaysChange }) {
     const ma7Series = chart.addSeries(LineSeries, { color: "#f0b90b", lineWidth: 1, priceLineVisible: false });
     const ma25Series = chart.addSeries(LineSeries, { color: "#8e6ee8", lineWidth: 1, priceLineVisible: false });
 
+    // Serie de respaldo: precio de cierre simple cuando no hay velas de Binance.US
+    // para esta moneda (fuente secundaria, CoinGecko).
+    const priceLineSeries = chart.addSeries(LineSeries, {
+      color: colors.accent,
+      lineWidth: 2,
+      priceFormat: { type: "custom", formatter: formatUsd, minMove: 0.00000001 },
+    });
+
     chartRef.current = chart;
-    seriesRef.current = { candleSeries, volumeSeries, ma7Series, ma25Series };
+    seriesRef.current = { candleSeries, volumeSeries, ma7Series, ma25Series, priceLineSeries };
 
     return () => {
       chart.remove();
@@ -96,35 +104,48 @@ export default function CryptoChart({ coinId, days, onDaysChange }) {
     };
     // recrea el chart si cambian los colores del tema o el rango (timeVisible depende de days)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [colors.tickText, colors.grid, colors.axis, colors.up, colors.down, days]);
+  }, [colors.tickText, colors.grid, colors.axis, colors.up, colors.down, colors.accent, days]);
+
+  const hasPrices = Boolean(history?.prices?.length);
 
   useEffect(() => {
-    const { candleSeries, volumeSeries, ma7Series, ma25Series } = seriesRef.current;
-    if (!candleSeries || !hasCandles) return;
+    const { candleSeries, volumeSeries, ma7Series, ma25Series, priceLineSeries } = seriesRef.current;
+    if (!candleSeries) return;
 
-    const candles = history.candles;
-    candleSeries.setData(
-      candles.map((c) => ({
-        time: c.timestamp / 1000,
-        open: c.open,
-        high: c.high,
-        low: c.low,
-        close: c.close,
-      }))
-    );
-    volumeSeries.setData(
-      candles.map((c) => ({
-        time: c.timestamp / 1000,
-        value: c.volume,
-        color: c.close >= c.open ? colors.up : colors.down,
-      }))
-    );
-    ma7Series.setData(movingAverage(candles, 7));
-    ma25Series.setData(movingAverage(candles, 25));
+    if (hasCandles) {
+      const candles = history.candles;
+      candleSeries.setData(
+        candles.map((c) => ({
+          time: c.timestamp / 1000,
+          open: c.open,
+          high: c.high,
+          low: c.low,
+          close: c.close,
+        }))
+      );
+      volumeSeries.setData(
+        candles.map((c) => ({
+          time: c.timestamp / 1000,
+          value: c.volume,
+          color: c.close >= c.open ? colors.up : colors.down,
+        }))
+      );
+      ma7Series.setData(movingAverage(candles, 7));
+      ma25Series.setData(movingAverage(candles, 25));
+      priceLineSeries.setData([]);
+    } else if (hasPrices) {
+      candleSeries.setData([]);
+      volumeSeries.setData([]);
+      ma7Series.setData([]);
+      ma25Series.setData([]);
+      priceLineSeries.setData(history.prices.map((p) => ({ time: p.timestamp / 1000, value: p.price })));
+    } else {
+      return;
+    }
     // fitContent tras el primer paint: autoSize mide el contenedor de forma asíncrona
     // (ResizeObserver), así que llamarlo en el mismo tick a veces usa un ancho stale
     requestAnimationFrame(() => chartRef.current?.timeScale().fitContent());
-  }, [history, hasCandles, colors.up, colors.down]);
+  }, [history, hasCandles, hasPrices, colors.up, colors.down]);
 
   if (!coinId) return null;
 
@@ -176,13 +197,9 @@ export default function CryptoChart({ coinId, days, onDaysChange }) {
         </div>
       )}
 
-      {!loading && !error && !hasCandles && (
+      {!loading && !error && !hasCandles && !hasPrices && (
         <div className="state">
-          <span className="state-title">Sin datos de velas para esta moneda</span>
-          <span className="state-desc">
-            Esta moneda no cotiza en Binance.US (la región desde la que se obtienen los datos de velas); solo hay
-            precio de cierre disponible vía CoinGecko.
-          </span>
+          <span className="state-title">Sin histórico disponible para esta moneda</span>
         </div>
       )}
 
@@ -194,9 +211,16 @@ export default function CryptoChart({ coinId, days, onDaysChange }) {
           width: "100%",
           height: 360,
           marginTop: 12,
-          display: !loading && !error && hasCandles ? "block" : "none",
+          display: !loading && !error && (hasCandles || hasPrices) ? "block" : "none",
         }}
       />
+
+      {!loading && !error && !hasCandles && hasPrices && (
+        <p className="chart-fallback-note">
+          Esta moneda no cotiza en Binance.US (la región desde la que se obtienen los datos de velas); se muestra el
+          precio de cierre de CoinGecko como fuente secundaria.
+        </p>
+      )}
     </div>
   );
 }

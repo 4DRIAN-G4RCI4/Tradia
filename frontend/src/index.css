@@ -1120,6 +1120,13 @@ select:focus-visible {
   max-width: 32ch;
 }
 
+.chart-fallback-note {
+  margin-top: var(--sp-3);
+  font-size: 0.8rem;
+  color: var(--text-faint);
+  text-align: center;
+}
+
 .state.state-error {
   color: var(--down);
 }
