@@ -179,7 +179,10 @@ export default function CryptoChart({ coinId, days, onDaysChange }) {
       {!loading && !error && !hasCandles && (
         <div className="state">
           <span className="state-title">Sin datos de velas para esta moneda</span>
-          <span className="state-desc">Esta moneda no cotiza en Binance; solo hay precio de cierre disponible.</span>
+          <span className="state-desc">
+            Esta moneda no cotiza en Binance.US (la región desde la que se obtienen los datos de velas); solo hay
+            precio de cierre disponible vía CoinGecko.
+          </span>
         </div>
       )}
 
