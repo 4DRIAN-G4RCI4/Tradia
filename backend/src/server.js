@@ -9,6 +9,11 @@ import analysisRoutes from "./routes/analysis.routes.js";
 
 const app = express();
 
+// Render (y la mayoría de PaaS) están detrás de un proxy que agrega
+// X-Forwarded-For; sin esto, express-rate-limit no puede identificar la IP
+// real del cliente y falla en vez de limitar por IP.
+app.set("trust proxy", 1);
+
 const rateLimitedResponse = (req, res) => {
   res.status(429).json({
     error: { message: "Demasiadas peticiones. Intenta de nuevo en unos segundos.", code: "RATE_LIMITED" },
