@@ -2,7 +2,11 @@ import axios from "axios";
 import { getOrFetch } from "./cache.service.js";
 import { config } from "../config.js";
 
-const client = axios.create({ baseURL: "https://api.binance.com/api/v3", timeout: 8000 });
+// Binance.com global bloquea por región (451) a servidores en EE.UU. (donde
+// corre Render). Binance.US es la entidad separada permitida ahí, con
+// catálogo de pares USDT más chico pero suficiente para las monedas top que
+// ya mapeamos.
+const client = axios.create({ baseURL: "https://api.binance.us/api/v3", timeout: 8000 });
 
 // Mapa de ids de CoinGecko (los que usa el resto de la app) a símbolos de Binance.
 // Solo se listan pares que realmente cotizan en Binance contra USDT.
