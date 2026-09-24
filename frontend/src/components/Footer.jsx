@@ -50,7 +50,7 @@ export default function Footer() {
           <h3>Desarrollado por</h3>
           <a
             className="footer-tecnopriv-link"
-            href="https://tecnopriv.netlify.app"
+            href="https://tecnopriv.online"
             target="_blank"
             rel="noopener noreferrer"
           >
